@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - My Boards</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <main class="card">
+    <h1 id="heading">Welcome back</h1>
+    <p class="hint" id="hint">Log in to see your boards.</p>
+
+    <form id="form">
+      <label for="user">Email</label>
+      <input id="user" type="email" autocomplete="email" required>
+
+      <div id="confirmWrap" hidden>
+        <label for="pass2">Confirm password</label>
+        <input id="pass2" type="password" autocomplete="new-password">
+      </div>
+
+      <label for="pass">Password</label>
+      <input id="pass" type="password" autocomplete="current-password" required>
+
+      <div id="msg" aria-live="polite"></div>
+      <button id="submit" class="btn" type="submit">Log in</button>
+    </form>
+
+    <p class="switch">
+      <span id="switchText">New here?</span>
+      <button id="switchBtn" class="link" type="button">Create an account</button>
+    </p>
+    <p class="storage-note">Your account is managed by Firebase and can be used on other devices.</p>
+  </main>
+  <script type="module" src="login.js"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Boards</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <nav class="tabs" id="tabs"></nav>
+
+    <div class="top">
+      <div>
+        <h1 id="title"></h1>
+        <div class="sub"><span id="tag"></span> · <span id="count">0</span> items</div>
+      </div>
+      <div class="actions">
+        <button class="btn dark" id="play">▶ Slideshow</button>
+        <button class="btn" id="add">+ Photos / videos</button>
+        <button class="btn dark" id="addLink">+ YouTube link</button>
+        <button class="btn" id="addBook">+ Add book</button>
+        <button class="btn" id="addTask">+ Add task</button>
+        <button class="btn" id="addGoal">+ New tracker</button>
+        <button class="btn dark" id="addWeb">+ Link website</button>
+      </div>
+    </div>
+
+    <div id="drop">Drag &amp; drop photos or videos here, or press "+ Photos / videos".</div>
+    <input type="file" id="file" accept="image/*,video/*" multiple hidden>
+
+    <main id="grid"></main>
+    <div id="list"></div>
+
+    <div class="foot">
+      <button class="btn grey" id="backup">⬇ Backup</button>
+      <button class="btn grey" id="restore">⬆ Restore</button>
+      <button class="btn grey" id="logout">Log out</button>
+    </div>
+    <input type="file" id="restoreFile" accept=".json" hidden>
+  </div>
+
+  <!-- big photo view -->
+  <div id="lb">
+    <img id="lbImg" alt="">
+    <div id="lbInfo"></div>
+  </div>
+
+  <!-- fullscreen slideshow -->
+  <div id="ss">
+    <div id="ssTitle"></div>
+    <button class="ssbtn ssclose" id="ssClose" aria-label="Close">✕</button>
+    <button class="ssbtn ssarrow" id="ssPrev" aria-label="Previous">‹</button>
+    <figure>
+      <img id="ssImg" alt="">
+      <figcaption>
+        <strong id="ssCap"></strong>
+        <div id="ssMeta"></div>
+      </figcaption>
+    </figure>
+    <button class="ssbtn ssarrow" id="ssNext" aria-label="Next">›</button>
+    <div class="ssbar">
+      <button class="ssbtn-ctrl" id="ssPlay">⏸ Pause</button>
+      <span id="ssNum"></span>
+    </div>
+  </div>
+
+  <!-- details pop-up -->
+  <dialog id="dlg">
+    <form id="dlgForm">
+      <h2 id="dlgTitle"></h2>
+      <div id="dlgExtra"></div>
+      <div id="dlgFields"></div>
+      <div class="row">
+        <button type="button" class="btn grey" id="dlgCancel">Cancel</button>
+        <button type="submit" class="btn">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toasts"></div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
