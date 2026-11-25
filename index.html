@@ -5,90 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My Boards</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    #paywallGate {
-      max-width: 540px;
-      margin: 36px auto;
-      padding: 32px 28px;
-      background: #fffdf9;
-      border: 1.5px solid #cbb89d;
-      border-radius: 20px;
-      box-shadow: 0 12px 30px rgba(53, 39, 29, 0.08);
-      text-align: center;
-      color: #35271d;
-    }
-
-    #paywallGate .paywall-badge {
-      display: inline-block;
-      padding: 5px 12px;
-      border-radius: 999px;
-      background: #f3d7c3;
-      border: 1px solid #cbb89d;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    #paywallGate h2 {
-      font-size: 1.65rem;
-      margin-bottom: 8px;
-      color: #35271d;
-    }
-
-    #paywallGate p {
-      font-size: 0.94rem;
-      color: #574436;
-      line-height: 1.5;
-      margin-bottom: 18px;
-    }
-
-    #paywallGate .paywall-perks {
-      list-style: none;
-      padding: 14px 18px;
-      margin: 0 0 22px;
-      background: #f8f0e2;
-      border: 1px dashed #bca98e;
-      border-radius: 14px;
-      text-align: left;
-      font-size: 0.9rem;
-      color: #35271d;
-    }
-
-    #paywallGate .paywall-perks li + li {
-      margin-top: 8px;
-    }
-
-    #paywallGate .paywall-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    #paywallGate .paywall-pay-btn {
-      width: 100%;
-      padding: 13px 18px;
-      border-radius: 12px;
-      border: 1px solid #59634e;
-      background: #7a856e;
-      color: #ffffff;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    #paywallGate .paywall-pay-btn:hover {
-      background: #67725c;
-    }
-
-    #paywallGate .paywall-status {
-      min-height: 18px;
-      margin-top: 12px;
-      font-size: 0.85rem;
-      color: #b5654c;
-    }
-  </style>
 </head>
 <body>
   <div class="wrap">
@@ -106,26 +22,6 @@
       </details>
     </header>
 
-    <section id="paywallGate" aria-labelledby="paywallTitle" hidden>
-      <span class="paywall-badge">✦ College Student Pass</span>
-      <h2 id="paywallTitle">Unlock Unlimited Entries</h2>
-      <p>
-        Hey<span id="paywallUserName"></span>! You get <strong>2 free entries per tab</strong> to try My Boards.
-        Unlock unlimited entries across all tabs for a student-friendly one-time ₹49 pass.
-      </p>
-      <ul class="paywall-perks">
-        <li>✓ 2 free entries in every tab before paying</li>
-        <li>✓ Unlimited photos, books, tasks, trackers, websites &amp; diary pages</li>
-        <li>✓ Student-friendly one-time ₹49 unlock</li>
-      </ul>
-      <div class="paywall-actions">
-        <button type="button" class="paywall-pay-btn" id="paywallPayBtn">Pay ₹49 Student Pass</button>
-        <button type="button" class="btn grey" id="paywallBackBtn" hidden>← Back to My Boards</button>
-        <button type="button" class="btn grey" id="paywallLogoutBtn">Log out</button>
-      </div>
-      <div id="paywallStatus" class="paywall-status" role="status" aria-live="polite"></div>
-    </section>
-
     <div id="paidAppContent">
       <main id="dashboard" class="dashboard" hidden></main>
 
@@ -137,6 +33,7 @@
         <div class="actions">
           <button class="btn grey" id="backToDashboard">← My Boards</button>
           <button class="btn dark" id="shuffle" hidden>🔀 Shuffle images</button>
+          <button class="btn dark" id="downloadBoard" hidden>🖨 Download Board</button>
           <button class="btn dark" id="play">▶ Slideshow</button>
           <button class="btn" id="add">+ Photos / videos</button>
           <button class="btn dark" id="addLink">+ YouTube link</button>
@@ -230,7 +127,6 @@
 
   <div id="toasts"></div>
 
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script type="module" src="script.js"></script>
 </body>
 </html>

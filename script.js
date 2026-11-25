@@ -1,7 +1,7 @@
 // =====================================================
 //  FIREBASE INITIALIZATION & IMPORTS
 // =====================================================
-import { deleteDoc, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { auth, db, storage } from "./firebase.js";
 import {
   deleteUser,
@@ -13,11 +13,6 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { deleteObject, getDownloadURL, listAll, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
-// ----- Student Pass config (replace with your Razorpay Key ID) -----
-const RAZORPAY_KEY_ID = "rzp_test_YOUR_KEY_ID";
-const ACCESS_AMOUNT_PAISE = 4900; // ₹49 in paise
-const FREE_ENTRIES_PER_TAB = 2;
 
 // ----- the tabs. kind = what the tab holds -----
 const BOARDS = [
@@ -75,8 +70,6 @@ const WEB_FIELDS = [
 
 const $ = s => document.querySelector(s);
 let currentUser = localStorage.getItem('currentUser') || '';
-let currentAuthUser = null;
-let hasPaidAccess = false;
 
 let data = {};
 KEYS.forEach(k => data[k] = []);
@@ -105,46 +98,6 @@ const uid = () => Date.now() + Math.random();
 const p2 = n => String(n).padStart(2, '0');
 const isImagePin = item => !item.type || item.type === 'image';
 
-// =====================================================
-//  2-ENTRY FREEMIUM LIMIT + ₹49 STUDENT PASS GATE
-// =====================================================
-function showPaywallModal(tabKey, extraCount = 1) {
-  const paywallGate = $('#paywallGate');
-  const paidAppContent = $('#paidAppContent');
-  const backBtn = $('#paywallBackBtn');
-  const statusEl = $('#paywallStatus');
-  const board = BOARDS.find(b => b.k === tabKey);
-
-  if (statusEl) {
-    statusEl.textContent = board
-      ? `You've used your ${FREE_ENTRIES_PER_TAB} free entries in "${board.name}"${extraCount > 1 ? ' (cannot add ' + extraCount + ' more)' : ''}. Unlock unlimited entries across all tabs for ₹49.`
-      : `You've reached the ${FREE_ENTRIES_PER_TAB}-entry free limit in this tab. Unlock unlimited entries for ₹49.`;
-  }
-  if (backBtn) backBtn.hidden = false;
-  if (paidAppContent) paidAppContent.hidden = true;
-  if (paywallGate) {
-    paywallGate.hidden = false;
-    paywallGate.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-}
-
-function hidePaywallModal() {
-  const paywallGate = $('#paywallGate');
-  const paidAppContent = $('#paidAppContent');
-  const statusEl = $('#paywallStatus');
-  if (statusEl) statusEl.textContent = '';
-  if (paywallGate) paywallGate.hidden = true;
-  if (paidAppContent) paidAppContent.hidden = false;
-}
-
-function canAddEntryToTab(tabKey, incomingCount = 1) {
-  if (hasPaidAccess) return true;
-  const currentCount = (data[tabKey] || []).length;
-  if (currentCount + incomingCount <= FREE_ENTRIES_PER_TAB) return true;
-  showPaywallModal(tabKey, incomingCount);
-  return false;
-}
-
 function waitForFirebaseAuthUser() {
   if (auth.currentUser) return Promise.resolve(auth.currentUser);
   return new Promise(resolve => {
@@ -158,96 +111,6 @@ function waitForFirebaseAuthUser() {
       resolve(user || null);
     });
   });
-}
-
-async function fetchPaymentStatus(uidValue) {
-  if (!uidValue) return false;
-  try {
-    const snap = await getDoc(doc(db, 'users', uidValue));
-    return !!(snap.exists() && snap.data().hasPaid === true);
-  } catch (err) {
-    console.error('Could not verify payment status:', err);
-    return false;
-  }
-}
-
-function openRazorpayCheckout(user) {
-  const statusEl = $('#paywallStatus');
-  if (statusEl) statusEl.textContent = '';
-
-  if (typeof window.Razorpay !== 'function') {
-    if (statusEl) statusEl.textContent = 'Payment checkout failed to load. Refresh and try again.';
-    return;
-  }
-  if (!RAZORPAY_KEY_ID || RAZORPAY_KEY_ID === 'rzp_test_YOUR_KEY_ID') {
-    if (statusEl) statusEl.textContent = 'Add your Razorpay Key ID in script.js before accepting payments.';
-    return;
-  }
-
-  const rzp = new window.Razorpay({
-    key: RAZORPAY_KEY_ID,
-    amount: ACCESS_AMOUNT_PAISE,
-    currency: 'INR',
-    name: 'My Boards',
-    description: 'Student Unlimited Pass (₹49)',
-    prefill: {
-      name: (user && user.displayName) || '',
-      email: (user && user.email) || ''
-    },
-    theme: { color: '#7a856e' },
-    handler: async response => {
-      const uidValue = (user && user.uid) || currentUser;
-      try {
-        await setDoc(doc(db, 'users', uidValue), {
-          email: (user && user.email) || '',
-          hasPaid: true,
-          plan: 'student_49',
-          razorpayPaymentId: response.razorpay_payment_id,
-          paidAt: serverTimestamp()
-        }, { merge: true });
-
-        hasPaidAccess = true;
-        hidePaywallModal();
-        render();
-        toast('🎉 Student pass unlocked! Add unlimited entries in every tab.');
-      } catch (err) {
-        console.error('Failed to record payment in Firestore:', err);
-        if (statusEl) statusEl.textContent = 'Payment succeeded, but saving unlock status failed. Please try again.';
-      }
-    }
-  });
-
-  rzp.on('payment.failed', resp => {
-    if (statusEl) {
-      statusEl.textContent = (resp && resp.error && resp.error.description) || 'Payment was not completed.';
-    }
-  });
-
-  rzp.open();
-}
-
-function wirePaywallControls() {
-  const payBtn = $('#paywallPayBtn');
-  if (payBtn) {
-    payBtn.onclick = () => openRazorpayCheckout(currentAuthUser || auth.currentUser);
-  }
-  const backBtn = $('#paywallBackBtn');
-  if (backBtn) {
-    backBtn.onclick = () => {
-      hidePaywallModal();
-      render();
-    };
-  }
-  const paywallLogoutBtn = $('#paywallLogoutBtn');
-  if (paywallLogoutBtn) {
-    paywallLogoutBtn.onclick = async () => {
-      try {
-        await signOut(auth);
-      } catch (_) {}
-      localStorage.removeItem('currentUser');
-      window.location.href = 'login.html';
-    };
-  }
 }
 
 function orderedPhotoItems(k, items) {
@@ -271,6 +134,183 @@ function shufflePhotoBoard(k) {
   }
   photoOrders.set(k, shuffled);
   render();
+}
+
+function loadImageForPrint(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+  if (!text) return y;
+  const words = String(text).split(/\s+/).filter(Boolean);
+  let line = '';
+  let currentY = y;
+  let lineCount = 0;
+
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line ? line + ' ' + words[i] : words[i];
+    if (ctx.measureText(testLine).width > maxWidth && line) {
+      lineCount++;
+      if (maxLines && lineCount >= maxLines) {
+        const truncated = line.length > 3 ? line.slice(0, -1) + '…' : line;
+        ctx.fillText(truncated, x, currentY);
+        return currentY + lineHeight;
+      }
+      ctx.fillText(line, x, currentY);
+      line = words[i];
+      currentY += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  if (line) {
+    ctx.fillText(line, x, currentY);
+    currentY += lineHeight;
+  }
+  return currentY;
+}
+
+async function downloadPrintableBoard(boardKey) {
+  const board = BOARDS.find(b => b.k === boardKey);
+  if (!board || board.kind !== 'photos') return;
+
+  const items = orderedPhotoItems(boardKey, data[boardKey] || []);
+  if (!items.length) {
+    toast('Add at least one item to this board before downloading.');
+    return;
+  }
+
+  const btn = $('#downloadBoard');
+  if (btn) btn.disabled = true;
+  toast('Preparing printable board image…');
+
+  try {
+    const cols = 3;
+    const canvasWidth = 1800;
+    const margin = 72;
+    const gap = 36;
+    const headerHeight = 140;
+    const footerHeight = 70;
+    const cardWidth = Math.floor((canvasWidth - margin * 2 - gap * (cols - 1)) / cols);
+    const photoBoxHeight = Math.round(cardWidth * 0.78);
+    const cardTextHeight = 128;
+    const cardHeight = photoBoxHeight + cardTextHeight + 28;
+    const rows = Math.ceil(items.length / cols);
+    const canvasHeight = headerHeight + rows * cardHeight + Math.max(0, rows - 1) * gap + margin + footerHeight;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#fffdf9';
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    ctx.strokeStyle = '#cbb89d';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(20, 20, canvasWidth - 40, canvasHeight - 40);
+
+    ctx.fillStyle = '#35271d';
+    ctx.font = 'bold 44px Georgia, serif';
+    ctx.fillText(board.name, margin, 74);
+
+    ctx.fillStyle = '#6b5646';
+    ctx.font = '24px Georgia, serif';
+    ctx.fillText(`${board.tag} · ${items.length} ${items.length === 1 ? 'item' : 'items'}`, margin, 114);
+
+    const loadedMedia = await Promise.all(items.map(async item => {
+      if (item.type === 'yt' && item.vid) {
+        return loadImageForPrint(`https://img.youtube.com/vi/${item.vid}/hqdefault.jpg`);
+      }
+      if (item.type === 'video' && item.blob) {
+        return null;
+      }
+      if (item.src) {
+        return loadImageForPrint(item.src);
+      }
+      return null;
+    }));
+
+    items.forEach((item, idx) => {
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
+      const x = margin + col * (cardWidth + gap);
+      const y = headerHeight + row * (cardHeight + gap);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x, y, cardWidth, cardHeight);
+      ctx.strokeStyle = '#d8c7b0';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, cardWidth, cardHeight);
+
+      const innerPad = 14;
+      const imgX = x + innerPad;
+      const imgY = y + innerPad;
+      const imgW = cardWidth - innerPad * 2;
+      const imgH = photoBoxHeight - innerPad;
+
+      ctx.fillStyle = '#f4ece0';
+      ctx.fillRect(imgX, imgY, imgW, imgH);
+
+      const img = loadedMedia[idx];
+      if (img && img.width && img.height) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(imgX, imgY, imgW, imgH);
+        ctx.clip();
+        const scale = Math.max(imgW / img.width, imgH / img.height);
+        const drawW = img.width * scale;
+        const drawH = img.height * scale;
+        ctx.drawImage(img, imgX + (imgW - drawW) / 2, imgY + (imgH - drawH) / 2, drawW, drawH);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = '#7c6654';
+        ctx.font = 'bold 26px Georgia, serif';
+        const label = item.type === 'video' ? '▶ Video Clip' : '✦ Photo';
+        ctx.fillText(label, imgX + 20, imgY + imgH / 2 + 8);
+      }
+
+      let textY = y + photoBoxHeight + 24;
+      ctx.fillStyle = '#35271d';
+      ctx.font = 'bold 22px Georgia, serif';
+      const titleText = item.title || (item.type === 'video' ? 'Video memory' : item.type === 'yt' ? 'YouTube clip' : 'Scrapbook memory');
+      textY = drawWrappedText(ctx, titleText, x + innerPad, textY, cardWidth - innerPad * 2, 26, 2);
+
+      if (item.date) {
+        ctx.fillStyle = '#7a856e';
+        ctx.font = '18px Georgia, serif';
+        ctx.fillText(fmt(item.date), x + innerPad, textY + 2);
+        textY += 26;
+      }
+
+      if (item.summary) {
+        ctx.fillStyle = '#574436';
+        ctx.font = '18px Georgia, serif';
+        drawWrappedText(ctx, item.summary, x + innerPad, textY + 2, cardWidth - innerPad * 2, 22, 2);
+      }
+    });
+
+    ctx.fillStyle = '#8b7765';
+    ctx.font = '18px Georgia, serif';
+    ctx.fillText(`Printed from My Boards · ${fmt(today())}`, margin, canvasHeight - 28);
+
+    const dataUrl = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = `${board.k}-printout-${today()}.png`;
+    link.click();
+    toast('🖨 Board printout image downloaded!');
+  } catch (err) {
+    console.error('Board printout export failed:', err);
+    toast('⚠ Could not generate the board image for printing.');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 function fmt(d) {
@@ -623,7 +663,6 @@ async function addFiles(list) {
   const k = cur;
   const files = Array.from(list || []);
   if (!files.length) return;
-  if (!canAddEntryToTab(k, files.length)) return;
 
   const added = [];
   for (const f of files) {
@@ -663,7 +702,6 @@ function details(it) {
 
 function addPhotoToAchievements(p, sourceKey) {
   if (!ACHIEVEMENT_SOURCE_KEYS.has(sourceKey) || !isImagePin(p) || !(data[sourceKey] || []).includes(p)) return;
-  if (!canAddEntryToTab('ach', 1)) return;
   data.ach = [{ ...p, id: uid() }, ...(data.ach || [])];
   photoOrders.delete('ach');
   save('ach');
@@ -740,7 +778,6 @@ function pinCard(p) {
 const addLinkBtn = $('#addLink');
 if (addLinkBtn) {
   addLinkBtn.onclick = () => {
-    if (!canAddEntryToTab(cur, 1)) return;
     const url = prompt('Paste a YouTube link:');
     if (!url) return;
     const m = url.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);
@@ -828,7 +865,6 @@ function bookExtra(ex, draft) {
 }
 
 function addBook() {
-  if (!canAddEntryToTab('books', 1)) return;
   const bk = { id: uid(), type: 'book', cover: '', title: '', author: '', started: '', date: '', about: '', summary: '' };
   editor('Add a book', BOOK_FIELDS, bk, d => { data.books.unshift(d); save('books'); render(); }, bookExtra);
 }
@@ -904,7 +940,6 @@ function calendarURL(t) {
 }
 
 function addTask() {
-  if (!canAddEntryToTab('tasks', 1)) return;
   const t = { id: uid(), title: '', date: '', remind: '', summary: '', done: false, notified: false };
   editor('Add a task', TASK_FIELDS, t, d => { data.tasks.unshift(d); save('tasks'); render(); });
 }
@@ -955,7 +990,6 @@ function renderTasks() {
 //  LINKED WEBSITES & EXTENSION TAB
 // =====================================================
 function addWebsite() {
-  if (!canAddEntryToTab('webs', 1)) return;
   const w = { id: uid(), title: '', url: 'https://', summary: '', scraped: '' };
   editor('Link Website or Extension', WEB_FIELDS, w, d => {
     data.webs.unshift(d);
@@ -1132,7 +1166,6 @@ function diaryStats() {
 function createOrOpenDiaryPage(date = today()) {
   let index = data.diary.findIndex(page => page.date === date);
   if (index < 0) {
-    if (!canAddEntryToTab('diary', 1)) return;
     data.diary.push({ id: uid(), date, title: '', html: '', theme: 'vintage', media: [] });
     data.diary.sort((a, b) => a.date.localeCompare(b.date));
     index = data.diary.findIndex(page => page.date === date);
@@ -2072,10 +2105,7 @@ function renderDashboard() {
     const folderTab = el('span', 'folder-tab');
     folderTab.append(el('span', 'folder-icon', icons[board.k] || '📁'));
     folderTab.append(el('span', 'folder-name', board.name.replace('📖 ', '')));
-    const countLabel = hasPaidAccess
-      ? String(items.length)
-      : `${Math.min(items.length, FREE_ENTRIES_PER_TAB)}/${FREE_ENTRIES_PER_TAB} free`;
-    folderTab.append(el('span', 'folder-count', isLockedDiary ? '🔒' : countLabel));
+    folderTab.append(el('span', 'folder-count', isLockedDiary ? '🔒' : String(items.length)));
 
     const body = el('span', 'folder-body');
     body.append(el('span', 'folder-description', board.tag));
@@ -2112,7 +2142,6 @@ function renderDashboard() {
 }
 
 function openBoard(key) {
-  hidePaywallModal();
   if (cur === 'diary' && key !== 'diary') lockDiary();
   cur = key;
   if (location.hash !== '#' + key) location.hash = key;
@@ -2120,7 +2149,6 @@ function openBoard(key) {
 }
 
 function goHome() {
-  hidePaywallModal();
   if (cur === 'diary') lockDiary();
   cur = 'home';
   if (location.hash) history.replaceState(null, '', location.pathname + location.search);
@@ -2151,11 +2179,7 @@ function render() {
   if (tagEl) tagEl.textContent = b.tag;
 
   const countEl = $('#count');
-  if (countEl) {
-    countEl.textContent = hasPaidAccess
-      ? String(items.length)
-      : `${items.length} (${Math.max(0, FREE_ENTRIES_PER_TAB - items.length)} free left)`;
-  }
+  if (countEl) countEl.textContent = String(items.length);
 
   const photos = b.kind === 'photos';
   const boardFrame = $('#boardFrame');
@@ -2163,6 +2187,10 @@ function render() {
   const shuffle = $('#shuffle'); if (shuffle) {
     shuffle.hidden = !photos;
     shuffle.disabled = items.length < 2;
+  }
+  const downloadBoard = $('#downloadBoard'); if (downloadBoard) {
+    downloadBoard.hidden = !photos;
+    downloadBoard.disabled = !items.length;
   }
   const drop = $('#drop'); if (drop) drop.hidden = !photos;
   const play = $('#play'); if (play) play.hidden = !photos;
@@ -2223,7 +2251,6 @@ if (lbEl) lbEl.onclick = () => lbEl.classList.remove('on');
 // ----- buttons + drag and drop -----
 const addBtn = $('#add');
 if (addBtn) addBtn.onclick = () => {
-  if (!canAddEntryToTab(cur, 1)) return;
   const f = $('#file');
   if (f) f.click();
 };
@@ -2268,7 +2295,6 @@ function fromHash() {
   cur = KEYS.includes(h) ? h : 'home';
 }
 window.addEventListener('hashchange', () => {
-  hidePaywallModal();
   const previous = cur;
   fromHash();
   if (previous === 'diary' && cur !== 'diary') lockDiary();
@@ -2398,6 +2424,9 @@ if (playBtn) {
 
 const shuffleBtn = $('#shuffle');
 if (shuffleBtn) shuffleBtn.onclick = () => shufflePhotoBoard(cur);
+
+const downloadBoardBtn = $('#downloadBoard');
+if (downloadBoardBtn) downloadBoardBtn.onclick = () => downloadPrintableBoard(cur);
 
 const ssNext = $('#ssNext'); if (ssNext) ssNext.onclick = () => { ssGo(1);  ssRestartTimer(); };
 const ssPrev = $('#ssPrev'); if (ssPrev) ssPrev.onclick = () => { ssGo(-1); ssRestartTimer(); };
@@ -2573,7 +2602,6 @@ function addDays(str, n) {
 }
 
 function addGoal() {
-  if (!canAddEntryToTab('report', 1)) return;
   const g = { id: uid(), title: '', start: today(), days: '30', entries: {}, ext: [] };
   editor('New tracker', [
     { k: 'title', label: 'My goal', type: 'text', req: true },
@@ -2716,10 +2744,7 @@ if (addGoalBtn) addGoalBtn.onclick = addGoal;
 //  START APP
 // =====================================================
 (async () => {
-  wirePaywallControls();
-
   const authUser = await waitForFirebaseAuthUser();
-  currentAuthUser = authUser;
 
   if (authUser && authUser.uid) {
     currentUser = authUser.uid;
@@ -2729,12 +2754,6 @@ if (addGoalBtn) addGoalBtn.onclick = addGoal;
     return;
   }
 
-  const nameSpan = $('#paywallUserName');
-  if (nameSpan && authUser && authUser.displayName) {
-    nameSpan.textContent = `, ${authUser.displayName}`;
-  }
-
-  hasPaidAccess = await fetchPaymentStatus(currentUser);
   await loadAll();
   fromHash();
   render();
