@@ -1,0 +1,1053 @@
+/* =========================================================
+   My Boards — Responsive Full-Width Laptop + Mobile CSS
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap');
+
+:root {
+  --bg-desk: #ede1cf;
+  --paper-cream: #fbf6ec;
+  --paper-warm: #f5ecdc;
+  --paper-card: #fffdf9;
+  --input-warm: #efe4d2;
+  --border-ink: #5b4839;
+  --border-tan: #cbb89d;
+
+  --ink-dark: #35271d;
+  --ink-brown: #574436;
+  --ink-muted: #7d6957;
+
+  --sage-btn: #7a856e;
+  --sage-hover: #67725c;
+  --terracotta: #b5654c;
+  --mustard: #e3b659;
+  --diary-leather: #7c4d32;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--ink-dark);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.45;
+  overflow-x: hidden;
+  background-color: var(--bg-desk);
+  background-image:
+    radial-gradient(circle at 10% 12%, rgba(227, 182, 89, 0.22), transparent 32%),
+    radial-gradient(circle at 88% 82%, rgba(181, 101, 76, 0.14), transparent 36%),
+    repeating-linear-gradient(
+      45deg,
+      rgba(91, 72, 57, 0.022) 0px,
+      rgba(91, 72, 57, 0.022) 2px,
+      transparent 2px,
+      transparent 8px
+    );
+}
+
+.page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================================================
+   Main Layout
+   - Laptop/Desktop: Top showcase + full-width features,
+     followed by a balanced collage + login split (or full grid)
+   ========================================================= */
+.landing {
+  flex: 1;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 28px 36px 32px;
+  display: grid;
+  grid-template-columns: 1.45fr 0.85fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.showcase {
+  display: contents;
+}
+
+/* =========================================================
+   1. Intro Header
+   ========================================================= */
+.intro {
+  grid-column: 1 / -1;
+  padding: 8px 12px 4px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--ink-dark);
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.brand-mark {
+  color: var(--terracotta);
+  font-size: 1.25rem;
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 4px;
+}
+
+.intro h1 {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(2.5rem, 4.4vw, 3.75rem);
+  font-weight: 700;
+  line-height: 0.98;
+  color: var(--ink-dark);
+  margin-bottom: 10px;
+}
+
+.intro h1 span {
+  display: inline;
+}
+
+.about {
+  font-size: 0.95rem;
+  color: var(--ink-brown);
+  max-width: 720px;
+}
+
+/* =========================================================
+   2. Full-Width "A board for every part of life" (.features)
+   Covers the full laptop width cleanly with 4 columns
+   ========================================================= */
+.features {
+  grid-column: 1 / -1;
+  width: 100%;
+  background: var(--paper-cream);
+  border: 1.4px solid var(--border-tan);
+  border-radius: 20px;
+  padding: 24px 28px;
+  box-shadow: 0 10px 26px rgba(53, 39, 29, 0.05);
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-heading h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.35rem, 2vw, 1.7rem);
+  color: var(--ink-dark);
+}
+
+.heading-sparkle {
+  color: var(--terracotta);
+  font-size: 1.35rem;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+.feature-card {
+  border-radius: 14px;
+  padding: 16px 18px;
+  min-height: 112px;
+  border: 1px solid rgba(53, 39, 29, 0.14);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(53, 39, 29, 0.07);
+}
+
+.feature-peach { background: #f3d7c3; }
+.feature-sage { background: #dfe5d5; }
+.feature-yellow { background: #f5dfb0; }
+.feature-lilac { background: #e6dce8; }
+
+.feature-icon {
+  font-size: 1rem;
+  line-height: 1;
+  margin-bottom: 8px;
+  color: var(--ink-dark);
+}
+
+.feature-card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink-dark);
+  margin-bottom: 4px;
+}
+
+.feature-card p {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ink-brown);
+}
+
+.features-note {
+  margin-top: 14px;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* =========================================================
+   3. Scrapbook Collage (.collage) + Sign-In Card (.card)
+   ========================================================= */
+.collage {
+  grid-column: 1;
+  position: relative;
+  background: rgba(251, 246, 236, 0.8);
+  border: 1.4px solid var(--border-tan);
+  border-radius: 22px;
+  padding: 28px 34px 24px 44px;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 28px;
+  align-items: start;
+  box-shadow: 0 10px 26px rgba(53, 39, 29, 0.05);
+}
+
+.flower,
+.doodle {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.flower-left {
+  top: -14px;
+  left: 8px;
+  font-size: 2.8rem;
+  color: #fffdf7;
+  text-shadow: 0 0 2px var(--border-ink), 0 4px 10px rgba(53, 39, 29, 0.14);
+}
+
+.flower-lower {
+  bottom: 8px;
+  left: 10px;
+  font-size: 2.3rem;
+  color: #fffdf7;
+  text-shadow: 0 0 2px var(--border-ink), 0 4px 10px rgba(53, 39, 29, 0.14);
+}
+
+.doodle-star {
+  top: 6px;
+  left: 46%;
+  font-size: 1.7rem;
+  color: var(--ink-brown);
+}
+
+/* Spiral Notebook */
+.inspiration-board {
+  position: relative;
+  margin: 0;
+}
+
+.notebook-tabs {
+  display: flex;
+  gap: 6px;
+  padding-left: 34px;
+  position: relative;
+  z-index: 2;
+}
+
+.notebook-tabs span {
+  padding: 5px 13px;
+  border-radius: 10px 10px 0 0;
+  font-family: 'Caveat', cursive;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--ink-dark);
+  border: 1.5px solid var(--border-ink);
+  border-bottom: none;
+}
+
+.tab-peach { background: #ebd0bc; }
+.tab-sage { background: #dfe5d3; }
+.tab-yellow { background: #f2da9e; }
+
+.notebook-paper {
+  position: relative;
+  background: var(--paper-cream);
+  border: 1.5px solid var(--border-ink);
+  border-radius: 10px;
+  padding: 16px 18px 16px 40px;
+  box-shadow: 4px 8px 20px rgba(53, 39, 29, 0.08);
+}
+
+.notebook-rings {
+  position: absolute;
+  left: 8px;
+  top: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.notebook-rings i {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 7px;
+  border-radius: 99px;
+  background: #6f5d4f;
+  border: 1px solid #35271d;
+}
+
+.notebook-rings i::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: -1px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--bg-desk);
+  border: 1.5px solid var(--border-ink);
+}
+
+.notebook-side-tabs {
+  position: absolute;
+  right: -25px;
+  top: 38px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1;
+}
+
+.notebook-side-tabs span {
+  writing-mode: vertical-rl;
+  padding: 9px 4px;
+  border-radius: 0 7px 7px 0;
+  font-family: 'Caveat', cursive;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ink-dark);
+  border: 1.5px solid var(--border-ink);
+  border-left: none;
+}
+
+.notebook-side-tabs span:nth-child(1) { background: #dce2cf; }
+.notebook-side-tabs span:nth-child(2) { background: #f2d99d; }
+.notebook-side-tabs span:nth-child(3) { background: #ecc6b2; }
+.notebook-side-tabs span:nth-child(4) { background: #e3d6e2; }
+
+.notebook-main {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 11px;
+}
+
+.board-tile {
+  background: var(--paper-card);
+  border: 1.2px solid var(--border-tan);
+  border-radius: 8px;
+  padding: 10px 11px;
+}
+
+.board-tile h3 {
+  font-family: 'Caveat', cursive;
+  font-size: 1.22rem;
+  font-weight: 700;
+  color: var(--ink-dark);
+  margin-bottom: 5px;
+}
+
+.board-tile p,
+.board-tile li {
+  font-size: 0.72rem;
+  color: var(--ink-brown);
+}
+
+.board-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+  margin-bottom: 6px;
+}
+
+.mini-board {
+  height: 28px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  border: 1px solid var(--border-tan);
+}
+
+.mini-photo { background: #dde5e8; }
+.mini-note { background: #f5ebd2; }
+.mini-book { background: #efd0bb; }
+.mini-star { background: #ebe4d8; }
+
+.board-books ol {
+  padding-left: 15px;
+  margin-bottom: 6px;
+}
+
+.book-stack {
+  font-size: 0.78rem;
+  letter-spacing: 2px;
+  color: var(--diary-leather);
+}
+
+.board-diary {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.diary-cover {
+  width: 46px;
+  height: 64px;
+  flex-shrink: 0;
+  background: var(--diary-leather);
+  color: #fff9ef;
+  border: 1.5px solid var(--border-ink);
+  border-radius: 3px 7px 7px 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.65rem;
+  line-height: 1.1;
+}
+
+.color-swatches {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.color-swatches i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1px solid var(--border-ink);
+  display: inline-block;
+}
+
+.color-swatches i:nth-child(1) { background: #c97b63; }
+.color-swatches i:nth-child(2) { background: #e3b659; }
+.color-swatches i:nth-child(3) { background: #88947a; }
+.color-swatches i:nth-child(4) { background: #6f5a49; }
+
+.achievement-sketch {
+  height: 44px;
+  background: #efe7d8;
+  border: 1px solid var(--border-tan);
+  border-radius: 5px;
+  margin-bottom: 5px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.achievement-sketch span {
+  position: absolute;
+  top: 5px;
+  right: 12px;
+  font-size: 0.85rem;
+  color: var(--ink-brown);
+}
+
+.achievement-sketch i:nth-of-type(1) {
+  width: 0;
+  height: 0;
+  border-left: 24px solid transparent;
+  border-right: 24px solid transparent;
+  border-bottom: 28px solid #c7b69c;
+}
+
+.achievement-sketch i:nth-of-type(2) {
+  width: 0;
+  height: 0;
+  border-left: 19px solid transparent;
+  border-right: 19px solid transparent;
+  border-bottom: 22px solid #b3a187;
+  margin-left: -12px;
+}
+
+.board-caption {
+  text-align: center;
+  margin-top: 10px;
+  font-family: 'Caveat', cursive;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ink-dark);
+}
+
+/* Collage Side Sticky Notes */
+.collage-side {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.collage-side article {
+  position: relative;
+  background: var(--paper-card);
+  border: 1.4px solid var(--border-ink);
+  border-radius: 6px;
+  padding: 11px 13px;
+  box-shadow: 3px 6px 14px rgba(53, 39, 29, 0.08);
+}
+
+.collage-side article::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 44px;
+  height: 11px;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(216, 163, 132, 0.78) 0px,
+    rgba(216, 163, 132, 0.78) 5px,
+    rgba(255, 250, 240, 0.85) 5px,
+    rgba(255, 250, 240, 0.85) 10px
+  );
+  border: 1px solid rgba(91, 72, 57, 0.35);
+  border-radius: 2px;
+}
+
+.collage-side h2 {
+  font-family: 'Caveat', cursive;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ink-dark);
+  margin-bottom: 4px;
+}
+
+.collage-side p,
+.collage-side li {
+  font-size: 0.74rem;
+  color: var(--ink-brown);
+  line-height: 1.4;
+}
+
+.vision-note {
+  grid-column: 1 / 3;
+  background: #fdf9f0;
+  transform: rotate(-1.5deg);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 12px;
+  align-items: center;
+}
+
+.vision-note .note-label {
+  grid-column: 1 / -1;
+  font-family: 'Caveat', cursive;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink-brown);
+}
+
+.mountain-sketch {
+  width: 58px;
+  height: 44px;
+  border: 1.2px solid var(--border-tan);
+  border-radius: 4px;
+  background: #f4ece0;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.mountain-sketch span {
+  font-size: 2.2rem;
+  line-height: 0.85;
+  color: #8b7965;
+}
+
+.mountain-sketch i {
+  position: absolute;
+  top: 3px;
+  left: 5px;
+  font-style: normal;
+  font-size: 0.75rem;
+}
+
+.vision-note ol {
+  padding-left: 15px;
+}
+
+.books-note {
+  background: #f8efe0;
+  transform: rotate(-1deg);
+}
+
+.books-drawing {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 5px;
+  background: #eadec9;
+  border: 1px solid var(--border-ink);
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.books-drawing i {
+  display: block;
+  height: 18px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #cbb89b 0px,
+    #cbb89b 3px,
+    #f9f3e8 3px,
+    #f9f3e8 6px
+  );
+  border: 1px solid #9d896f;
+}
+
+.daily-note {
+  background: #faf4e8;
+  transform: rotate(1.5deg);
+  margin-top: 6px;
+}
+
+.daily-note ul {
+  list-style: none;
+}
+
+.websites-note {
+  background: #fdf9f2;
+  transform: rotate(-1deg);
+}
+
+.browser-drawing {
+  border: 1px solid var(--border-ink);
+  border-radius: 5px;
+  padding: 5px;
+  background: #f3e8d6;
+  margin-bottom: 6px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.browser-drawing i {
+  display: block;
+  height: 5px;
+  border-radius: 99px;
+  background: #c79a7b;
+}
+
+.browser-drawing span {
+  display: block;
+  height: 20px;
+  border-radius: 3px;
+  background: #e6d8c3;
+  border: 1px solid var(--border-tan);
+}
+
+.tasks-note {
+  background-color: #fffdf7;
+  background-image:
+    linear-gradient(to right, rgba(166, 148, 124, 0.28) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(166, 148, 124, 0.28) 1px, transparent 1px);
+  background-size: 13px 13px;
+  transform: rotate(1deg);
+}
+
+.grid-label {
+  position: absolute;
+  top: -11px;
+  right: 8px;
+  font-family: 'Caveat', cursive;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink-dark);
+}
+
+.tasks-note ul {
+  list-style: none;
+}
+
+.scribble {
+  font-family: 'Caveat', cursive;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink-dark);
+  line-height: 1.08;
+}
+
+.scribble span {
+  color: var(--terracotta);
+}
+
+.scribble-top {
+  position: absolute;
+  top: 4px;
+  right: -6px;
+  transform: rotate(-3deg);
+}
+
+.scribble-bottom {
+  grid-column: 1 / -1;
+  transform: rotate(-1.5deg);
+}
+
+.made-note {
+  grid-column: 1 / -1;
+  font-family: 'Caveat', cursive;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink-dark);
+  margin-top: 2px;
+}
+
+.made-note span {
+  color: var(--terracotta);
+}
+
+/* =========================================================
+   4. Sign-In Card (.card)
+   ========================================================= */
+.card {
+  grid-column: 2;
+  width: 100%;
+  background: var(--paper-cream);
+  border: 1.4px solid var(--border-tan);
+  border-radius: 22px;
+  padding: 34px 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 14px 32px rgba(53, 39, 29, 0.08);
+}
+
+.card-art {
+  position: relative;
+  width: 104px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.sun-disc {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--mustard);
+  border: 1.8px solid var(--border-ink);
+  z-index: 2;
+}
+
+.sun-rays {
+  position: absolute;
+  top: -10px;
+  font-size: 3.7rem;
+  color: var(--border-ink);
+  line-height: 1;
+  z-index: 1;
+}
+
+.art-leaf {
+  position: absolute;
+  bottom: 8px;
+  width: 24px;
+  height: 11px;
+  background: var(--sage-btn);
+  border: 1.2px solid var(--border-ink);
+  border-radius: 12px 0 12px 0;
+  z-index: 3;
+}
+
+.leaf-one {
+  left: 10px;
+  transform: rotate(16deg);
+}
+
+.leaf-two {
+  right: 12px;
+  transform: scaleX(-1) rotate(26deg);
+}
+
+.art-rainbow {
+  position: absolute;
+  bottom: 4px;
+  right: 2px;
+  font-size: 0.72rem;
+  color: var(--terracotta);
+  z-index: 3;
+}
+
+.card-brand {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--ink-dark);
+  margin-bottom: 14px;
+}
+
+#heading {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink-dark);
+  margin-bottom: 4px;
+}
+
+.hint {
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  margin-bottom: 22px;
+}
+
+#form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+#form label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--ink-dark);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.password-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+}
+
+#confirmWrap {
+  margin-top: 14px;
+}
+
+.forgot-link {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  color: var(--ink-brown);
+  text-decoration: underline;
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+
+#form input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.2px solid var(--border-tan);
+  background: var(--input-warm);
+  color: var(--ink-dark);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#form input::placeholder {
+  color: var(--ink-muted);
+  font-size: 0.84rem;
+}
+
+#form input:focus {
+  background: #ffffff;
+  border-color: var(--sage-btn);
+  box-shadow: 0 0 0 3px rgba(122, 133, 110, 0.2);
+}
+
+#msg {
+  min-height: 18px;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--terracotta);
+  text-align: center;
+}
+
+.btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px 18px;
+  border: 1px solid #59634e;
+  border-radius: 11px;
+  background: var(--sage-btn);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 5px 12px rgba(91, 72, 57, 0.22);
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.btn:hover {
+  background: var(--sage-hover);
+  transform: translateY(-1px);
+}
+
+.google-row {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: var(--ink-muted);
+}
+
+.google-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ink-dark);
+}
+
+.google-button:hover .google-name {
+  text-decoration: underline;
+}
+
+.google-mark {
+  width: 18px;
+  height: 18px;
+}
+
+.switch {
+  margin-top: 16px;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.switch .link {
+  background: none;
+  border: none;
+  color: var(--ink-dark);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.footer {
+  text-align: center;
+  padding: 14px 20px;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  background: rgba(251, 246, 236, 0.7);
+  border-top: 1px solid var(--border-tan);
+}
+
+.footer span {
+  color: var(--terracotta);
+}
+
+/* =========================================================
+   Tablet & Mobile Responsiveness
+   ========================================================= */
+@media (max-width: 1080px) {
+  .landing {
+    grid-template-columns: 1fr;
+    padding: 24px 20px 28px;
+  }
+
+  .intro,
+  .features,
+  .collage,
+  .card {
+    grid-column: 1;
+  }
+
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .landing {
+    padding: 16px 14px 24px;
+    gap: 20px;
+  }
+
+  .intro {
+    padding: 4px 4px 0;
+  }
+
+  .features,
+  .collage,
+  .card {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+
+  .feature-grid,
+  .collage,
+  .notebook-main,
+  .collage-side {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .vision-note {
+    grid-column: 1;
+    transform: none;
+  }
+
+  .books-note,
+  .daily-note,
+  .websites-note,
+  .tasks-note {
+    transform: none;
+    margin-top: 0;
+  }
+
+  .notebook-side-tabs,
+  .scribble-top {
+    display: none;
+  }
+}
