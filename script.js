@@ -1,7 +1,7 @@
 // =====================================================
 //  FIREBASE INITIALIZATION & IMPORTS
 // =====================================================
-import { deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { deleteDoc, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { auth, db, storage } from "./firebase.js";
 import {
   deleteUser,
@@ -14,9 +14,10 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { deleteObject, getDownloadURL, listAll, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-// ----- login check using your existing login page -----
-const currentUser = localStorage.getItem('currentUser');
-if (!currentUser) window.location.href = 'login.html';
+// ----- Student Pass config (replace with your Razorpay Key ID) -----
+const RAZORPAY_KEY_ID = "rzp_test_YOUR_KEY_ID";
+const ACCESS_AMOUNT_PAISE = 4900; // ₹49 in paise
+const FREE_ENTRIES_PER_TAB = 2;
 
 // ----- the tabs. kind = what the tab holds -----
 const BOARDS = [
@@ -73,6 +74,10 @@ const WEB_FIELDS = [
 ];
 
 const $ = s => document.querySelector(s);
+let currentUser = localStorage.getItem('currentUser') || '';
+let currentAuthUser = null;
+let hasPaidAccess = false;
+
 let data = {};
 KEYS.forEach(k => data[k] = []);
 let diaryMeta = { title: 'My Personal Diary', cover: '' };
@@ -99,6 +104,151 @@ function el(tag, cls, text) {
 const uid = () => Date.now() + Math.random();
 const p2 = n => String(n).padStart(2, '0');
 const isImagePin = item => !item.type || item.type === 'image';
+
+// =====================================================
+//  2-ENTRY FREEMIUM LIMIT + ₹49 STUDENT PASS GATE
+// =====================================================
+function showPaywallModal(tabKey, extraCount = 1) {
+  const paywallGate = $('#paywallGate');
+  const paidAppContent = $('#paidAppContent');
+  const backBtn = $('#paywallBackBtn');
+  const statusEl = $('#paywallStatus');
+  const board = BOARDS.find(b => b.k === tabKey);
+
+  if (statusEl) {
+    statusEl.textContent = board
+      ? `You've used your ${FREE_ENTRIES_PER_TAB} free entries in "${board.name}"${extraCount > 1 ? ' (cannot add ' + extraCount + ' more)' : ''}. Unlock unlimited entries across all tabs for ₹49.`
+      : `You've reached the ${FREE_ENTRIES_PER_TAB}-entry free limit in this tab. Unlock unlimited entries for ₹49.`;
+  }
+  if (backBtn) backBtn.hidden = false;
+  if (paidAppContent) paidAppContent.hidden = true;
+  if (paywallGate) {
+    paywallGate.hidden = false;
+    paywallGate.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function hidePaywallModal() {
+  const paywallGate = $('#paywallGate');
+  const paidAppContent = $('#paidAppContent');
+  const statusEl = $('#paywallStatus');
+  if (statusEl) statusEl.textContent = '';
+  if (paywallGate) paywallGate.hidden = true;
+  if (paidAppContent) paidAppContent.hidden = false;
+}
+
+function canAddEntryToTab(tabKey, incomingCount = 1) {
+  if (hasPaidAccess) return true;
+  const currentCount = (data[tabKey] || []).length;
+  if (currentCount + incomingCount <= FREE_ENTRIES_PER_TAB) return true;
+  showPaywallModal(tabKey, incomingCount);
+  return false;
+}
+
+function waitForFirebaseAuthUser() {
+  if (auth.currentUser) return Promise.resolve(auth.currentUser);
+  return new Promise(resolve => {
+    const timer = setTimeout(() => {
+      unsubscribe();
+      resolve(auth.currentUser || null);
+    }, 2500);
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      clearTimeout(timer);
+      unsubscribe();
+      resolve(user || null);
+    });
+  });
+}
+
+async function fetchPaymentStatus(uidValue) {
+  if (!uidValue) return false;
+  try {
+    const snap = await getDoc(doc(db, 'users', uidValue));
+    return !!(snap.exists() && snap.data().hasPaid === true);
+  } catch (err) {
+    console.error('Could not verify payment status:', err);
+    return false;
+  }
+}
+
+function openRazorpayCheckout(user) {
+  const statusEl = $('#paywallStatus');
+  if (statusEl) statusEl.textContent = '';
+
+  if (typeof window.Razorpay !== 'function') {
+    if (statusEl) statusEl.textContent = 'Payment checkout failed to load. Refresh and try again.';
+    return;
+  }
+  if (!RAZORPAY_KEY_ID || RAZORPAY_KEY_ID === 'rzp_test_YOUR_KEY_ID') {
+    if (statusEl) statusEl.textContent = 'Add your Razorpay Key ID in script.js before accepting payments.';
+    return;
+  }
+
+  const rzp = new window.Razorpay({
+    key: RAZORPAY_KEY_ID,
+    amount: ACCESS_AMOUNT_PAISE,
+    currency: 'INR',
+    name: 'My Boards',
+    description: 'Student Unlimited Pass (₹49)',
+    prefill: {
+      name: (user && user.displayName) || '',
+      email: (user && user.email) || ''
+    },
+    theme: { color: '#7a856e' },
+    handler: async response => {
+      const uidValue = (user && user.uid) || currentUser;
+      try {
+        await setDoc(doc(db, 'users', uidValue), {
+          email: (user && user.email) || '',
+          hasPaid: true,
+          plan: 'student_49',
+          razorpayPaymentId: response.razorpay_payment_id,
+          paidAt: serverTimestamp()
+        }, { merge: true });
+
+        hasPaidAccess = true;
+        hidePaywallModal();
+        render();
+        toast('🎉 Student pass unlocked! Add unlimited entries in every tab.');
+      } catch (err) {
+        console.error('Failed to record payment in Firestore:', err);
+        if (statusEl) statusEl.textContent = 'Payment succeeded, but saving unlock status failed. Please try again.';
+      }
+    }
+  });
+
+  rzp.on('payment.failed', resp => {
+    if (statusEl) {
+      statusEl.textContent = (resp && resp.error && resp.error.description) || 'Payment was not completed.';
+    }
+  });
+
+  rzp.open();
+}
+
+function wirePaywallControls() {
+  const payBtn = $('#paywallPayBtn');
+  if (payBtn) {
+    payBtn.onclick = () => openRazorpayCheckout(currentAuthUser || auth.currentUser);
+  }
+  const backBtn = $('#paywallBackBtn');
+  if (backBtn) {
+    backBtn.onclick = () => {
+      hidePaywallModal();
+      render();
+    };
+  }
+  const paywallLogoutBtn = $('#paywallLogoutBtn');
+  if (paywallLogoutBtn) {
+    paywallLogoutBtn.onclick = async () => {
+      try {
+        await signOut(auth);
+      } catch (_) {}
+      localStorage.removeItem('currentUser');
+      window.location.href = 'login.html';
+    };
+  }
+}
 
 function orderedPhotoItems(k, items) {
   const savedOrder = photoOrders.get(k);
@@ -246,7 +396,6 @@ async function loadAll() {
     }
   } catch (err) {
     console.error("Cloud load failed, using local storage fallback:", err);
-    // Fallback to localStorage if offline or rules block
     KEYS.forEach(k => {
       const localVal = localStorage.getItem('board_' + currentUser + '_' + k);
       if (localVal) {
@@ -314,7 +463,6 @@ async function save(k) {
     return pending;
   }
 
-  // Always save locally first so it never loses data
   try {
     if (k) {
       localStorage.setItem('board_' + currentUser + '_' + k, JSON.stringify(k === 'diary' ? [] : data[k]));
@@ -329,7 +477,6 @@ async function save(k) {
     toast('Could not save locally. Browser storage may be full.');
   }
 
-  // Then try pushing to Firestore
   try {
     const docRef = doc(db, "users", currentUser);
     const payload = {};
@@ -376,7 +523,7 @@ function blobURL(b) {
 function editor(heading, fields, item, onSave, extra) {
   const dlgTitle = $('#dlgTitle');
   if (dlgTitle) dlgTitle.textContent = heading;
-  
+
   const ex = $('#dlgExtra');
   if (ex) {
     ex.innerHTML = '';
@@ -473,8 +620,13 @@ function removeItem(k, item, label) {
 //  PHOTOS + VIDEOS
 // =====================================================
 async function addFiles(list) {
-  const k = cur, added = [];
-  for (const f of list) {
+  const k = cur;
+  const files = Array.from(list || []);
+  if (!files.length) return;
+  if (!canAddEntryToTab(k, files.length)) return;
+
+  const added = [];
+  for (const f of files) {
     if (f.type.startsWith('image/')) {
       const src = await shrink(f);
       if (src) added.push({ id: uid(), type: 'image', src, title: '', date: '', summary: '' });
@@ -483,6 +635,7 @@ async function addFiles(list) {
       added.push({ id: uid(), type: 'video', blob: f, title: f.name.replace(/\.[^.]+$/, ''), date: '', summary: '' });
     }
   }
+  if (!added.length) return;
   data[k] = [...added, ...data[k]];
   save(k);
   render();
@@ -510,6 +663,7 @@ function details(it) {
 
 function addPhotoToAchievements(p, sourceKey) {
   if (!ACHIEVEMENT_SOURCE_KEYS.has(sourceKey) || !isImagePin(p) || !(data[sourceKey] || []).includes(p)) return;
+  if (!canAddEntryToTab('ach', 1)) return;
   data.ach = [{ ...p, id: uid() }, ...(data.ach || [])];
   photoOrders.delete('ach');
   save('ach');
@@ -586,6 +740,7 @@ function pinCard(p) {
 const addLinkBtn = $('#addLink');
 if (addLinkBtn) {
   addLinkBtn.onclick = () => {
+    if (!canAddEntryToTab(cur, 1)) return;
     const url = prompt('Paste a YouTube link:');
     if (!url) return;
     const m = url.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);
@@ -621,7 +776,7 @@ function bookExtra(ex, draft) {
 
   const bup = $('#bup');
   if (bup) bup.onclick = () => $('#bfile').click();
-  
+
   const bfile = $('#bfile');
   if (bfile) {
     bfile.onchange = async e => {
@@ -633,7 +788,7 @@ function bookExtra(ex, draft) {
   }
 
   const bq = $('#bq');
-  if (bq) bq.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); const bgo = $('#bgo'); if(bgo) bgo.click(); } };
+  if (bq) bq.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); const bgo = $('#bgo'); if (bgo) bgo.click(); } };
 
   const bgo = $('#bgo');
   if (bgo) {
@@ -673,6 +828,7 @@ function bookExtra(ex, draft) {
 }
 
 function addBook() {
+  if (!canAddEntryToTab('books', 1)) return;
   const bk = { id: uid(), type: 'book', cover: '', title: '', author: '', started: '', date: '', about: '', summary: '' };
   editor('Add a book', BOOK_FIELDS, bk, d => { data.books.unshift(d); save('books'); render(); }, bookExtra);
 }
@@ -748,6 +904,7 @@ function calendarURL(t) {
 }
 
 function addTask() {
+  if (!canAddEntryToTab('tasks', 1)) return;
   const t = { id: uid(), title: '', date: '', remind: '', summary: '', done: false, notified: false };
   editor('Add a task', TASK_FIELDS, t, d => { data.tasks.unshift(d); save('tasks'); render(); });
 }
@@ -798,6 +955,7 @@ function renderTasks() {
 //  LINKED WEBSITES & EXTENSION TAB
 // =====================================================
 function addWebsite() {
+  if (!canAddEntryToTab('webs', 1)) return;
   const w = { id: uid(), title: '', url: 'https://', summary: '', scraped: '' };
   editor('Link Website or Extension', WEB_FIELDS, w, d => {
     data.webs.unshift(d);
@@ -839,8 +997,8 @@ async function fetchWebsiteData(w) {
     const json = await res.json();
     if (json && json.contents) {
       const parser = new DOMParser();
-      const doc = parser.parseFromString(json.contents, 'text/html');
-      const text = doc.body ? doc.body.innerText.replace(/\s+/g, ' ').trim().slice(0, 400) : 'Content found.';
+      const docObj = parser.parseFromString(json.contents, 'text/html');
+      const text = docObj.body ? docObj.body.innerText.replace(/\s+/g, ' ').trim().slice(0, 400) : 'Content found.';
       const entry = '🔄 Synced ' + new Date().toLocaleString() + ':\n' + text + '...';
       w.scraped = w.scraped ? entry + '\n\n' + w.scraped : entry;
       save('webs');
@@ -974,6 +1132,7 @@ function diaryStats() {
 function createOrOpenDiaryPage(date = today()) {
   let index = data.diary.findIndex(page => page.date === date);
   if (index < 0) {
+    if (!canAddEntryToTab('diary', 1)) return;
     data.diary.push({ id: uid(), date, title: '', html: '', theme: 'vintage', media: [] });
     data.diary.sort((a, b) => a.date.localeCompare(b.date));
     index = data.diary.findIndex(page => page.date === date);
@@ -1346,7 +1505,7 @@ function manageDiaryRecovery() {
     migrateLegacy ? 'Set up diary recovery' : 'Change diary recovery question',
     fields,
     draft,
-    details => saveDiaryRecovery(details, migrateLegacy),
+    detailsObj => saveDiaryRecovery(detailsObj, migrateLegacy),
     extra => extra.append(el('p', 'diary-lock-copy', 'Your answer protects an encrypted recovery key. Choose a private answer only you know and keep it safe.'))
   );
 }
@@ -1913,7 +2072,10 @@ function renderDashboard() {
     const folderTab = el('span', 'folder-tab');
     folderTab.append(el('span', 'folder-icon', icons[board.k] || '📁'));
     folderTab.append(el('span', 'folder-name', board.name.replace('📖 ', '')));
-    folderTab.append(el('span', 'folder-count', isLockedDiary ? '🔒' : String(items.length)));
+    const countLabel = hasPaidAccess
+      ? String(items.length)
+      : `${Math.min(items.length, FREE_ENTRIES_PER_TAB)}/${FREE_ENTRIES_PER_TAB} free`;
+    folderTab.append(el('span', 'folder-count', isLockedDiary ? '🔒' : countLabel));
 
     const body = el('span', 'folder-body');
     body.append(el('span', 'folder-description', board.tag));
@@ -1950,6 +2112,7 @@ function renderDashboard() {
 }
 
 function openBoard(key) {
+  hidePaywallModal();
   if (cur === 'diary' && key !== 'diary') lockDiary();
   cur = key;
   if (location.hash !== '#' + key) location.hash = key;
@@ -1957,6 +2120,7 @@ function openBoard(key) {
 }
 
 function goHome() {
+  hidePaywallModal();
   if (cur === 'diary') lockDiary();
   cur = 'home';
   if (location.hash) history.replaceState(null, '', location.pathname + location.search);
@@ -1979,15 +2143,19 @@ function render() {
   const b = BOARDS.find(x => x.k === cur);
   if (!b) return;
   const items = data[cur] || [];
-  
+
   const titleEl = $('#title');
   if (titleEl) titleEl.textContent = b.name;
-  
+
   const tagEl = $('#tag');
   if (tagEl) tagEl.textContent = b.tag;
-  
+
   const countEl = $('#count');
-  if (countEl) countEl.textContent = items.length;
+  if (countEl) {
+    countEl.textContent = hasPaidAccess
+      ? String(items.length)
+      : `${items.length} (${Math.max(0, FREE_ENTRIES_PER_TAB - items.length)} free left)`;
+  }
 
   const photos = b.kind === 'photos';
   const boardFrame = $('#boardFrame');
@@ -2054,7 +2222,11 @@ if (lbEl) lbEl.onclick = () => lbEl.classList.remove('on');
 
 // ----- buttons + drag and drop -----
 const addBtn = $('#add');
-if (addBtn) addBtn.onclick = () => { const f = $('#file'); if (f) f.click(); };
+if (addBtn) addBtn.onclick = () => {
+  if (!canAddEntryToTab(cur, 1)) return;
+  const f = $('#file');
+  if (f) f.click();
+};
 
 const fileInput = $('#file');
 if (fileInput) fileInput.onchange = e => { addFiles(e.target.files); e.target.value = ''; };
@@ -2096,6 +2268,7 @@ function fromHash() {
   cur = KEYS.includes(h) ? h : 'home';
 }
 window.addEventListener('hashchange', () => {
+  hidePaywallModal();
   const previous = cur;
   fromHash();
   if (previous === 'diary' && cur !== 'diary') lockDiary();
@@ -2214,7 +2387,7 @@ if (playBtn) {
     ssI = 0;
     ssPlaying = true;
     const ssPlay = $('#ssPlay'); if (ssPlay) ssPlay.textContent = '⏸ Pause';
-    const ssTitle = $('#ssTitle'); 
+    const ssTitle = $('#ssTitle');
     const board = BOARDS.find(b => b.k === cur);
     if (ssTitle && board) ssTitle.textContent = board.name;
     const ss = $('#ss'); if (ss) ss.classList.add('on');
@@ -2284,8 +2457,8 @@ function waitForCurrentUser() {
   });
 }
 
-function clearLocalAccountData(uid) {
-  const prefix = 'board_' + uid + '_';
+function clearLocalAccountData(uidValue) {
+  const prefix = 'board_' + uidValue + '_';
   for (let index = localStorage.length - 1; index >= 0; index--) {
     const key = localStorage.key(index);
     if (key === 'currentUser' || (key && key.startsWith(prefix))) localStorage.removeItem(key);
@@ -2400,6 +2573,7 @@ function addDays(str, n) {
 }
 
 function addGoal() {
+  if (!canAddEntryToTab('report', 1)) return;
   const g = { id: uid(), title: '', start: today(), days: '30', entries: {}, ext: [] };
   editor('New tracker', [
     { k: 'title', label: 'My goal', type: 'text', req: true },
@@ -2542,6 +2716,25 @@ if (addGoalBtn) addGoalBtn.onclick = addGoal;
 //  START APP
 // =====================================================
 (async () => {
+  wirePaywallControls();
+
+  const authUser = await waitForFirebaseAuthUser();
+  currentAuthUser = authUser;
+
+  if (authUser && authUser.uid) {
+    currentUser = authUser.uid;
+    localStorage.setItem('currentUser', authUser.uid);
+  } else if (!currentUser) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const nameSpan = $('#paywallUserName');
+  if (nameSpan && authUser && authUser.displayName) {
+    nameSpan.textContent = `, ${authUser.displayName}`;
+  }
+
+  hasPaidAccess = await fetchPaymentStatus(currentUser);
   await loadAll();
   fromHash();
   render();
