@@ -3,36 +3,225 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login - My Boards</title>
+  <meta name="theme-color" content="#f4ead8">
+  <title>My Boards — Your world, beautifully organized</title>
   <link rel="stylesheet" href="login.css">
 </head>
 <body>
-  <main class="card">
-    <h1 id="heading">Welcome back</h1>
-    <p class="hint" id="hint">Log in to see your boards.</p>
+  <div class="page">
+    <main class="landing">
+      <section class="showcase" aria-label="Explore My Boards">
+        <header class="intro">
+          <a class="brand" href="login.html" aria-label="My Boards home">
+            <span class="brand-mark" aria-hidden="true">✿</span>
+            <span>My Boards</span>
+          </a>
+          <p class="eyebrow">A little space for everything that matters</p>
+          <h1>Your world,<br><span>beautifully organized.</span></h1>
+          <p class="about">My Boards is your personal corner to save the moments you’re proud of, plan what’s next, keep up with everyday tasks, and collect the things that inspire you.</p>
+        </header>
 
-    <form id="form">
-      <label for="user">Email</label>
-      <input id="user" type="email" autocomplete="email" required>
+        <section class="features" aria-labelledby="featuresTitle">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Your ideas, all in one place</p>
+              <h2 id="featuresTitle">A board for every part of life</h2>
+            </div>
+            <span class="heading-sparkle" aria-hidden="true">✳</span>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card feature-peach">
+              <span class="feature-icon" aria-hidden="true">♡</span>
+              <h3>My Achievements</h3>
+              <p>Keep the photos and memories that make you proud.</p>
+            </article>
+            <article class="feature-card feature-sage">
+              <span class="feature-icon" aria-hidden="true">✧</span>
+              <h3>What I Want</h3>
+              <p>Gather inspiration and keep your next goals in sight.</p>
+            </article>
+            <article class="feature-card feature-yellow">
+              <span class="feature-icon" aria-hidden="true">☼</span>
+              <h3>After 5 Years</h3>
+              <p>Picture the future you’re working towards.</p>
+            </article>
+            <article class="feature-card feature-lilac">
+              <span class="feature-icon" aria-hidden="true">▤</span>
+              <h3>Books</h3>
+              <p>Save what you’ve read, your notes, and your next books.</p>
+            </article>
+            <article class="feature-card feature-yellow">
+              <span class="feature-icon" aria-hidden="true">✓</span>
+              <h3>Tasks</h3>
+              <p>Organize your to-dos and make room for daily routines.</p>
+            </article>
+            <article class="feature-card feature-peach">
+              <span class="feature-icon" aria-hidden="true">◷</span>
+              <h3>Daily Report</h3>
+              <p>Track the small steps you take towards your goals.</p>
+            </article>
+            <article class="feature-card feature-lilac">
+              <span class="feature-icon" aria-hidden="true">↗</span>
+              <h3>Websites</h3>
+              <p>Keep useful links and favorite places close at hand.</p>
+            </article>
+            <article class="feature-card feature-sage">
+              <span class="feature-icon" aria-hidden="true">✎</span>
+              <h3>Personal Diary</h3>
+              <p>Write privately, reflect, and track your habits.</p>
+            </article>
+          </div>
+          <p class="features-note"><span aria-hidden="true">✦</span> Add photos, notes, links, and little reminders as you go.</p>
+        </section>
 
-      <div id="confirmWrap" hidden>
-        <label for="pass2">Confirm password</label>
-        <input id="pass2" type="password" autocomplete="new-password">
-      </div>
+        <div class="collage">
+          <span class="flower flower-left" aria-hidden="true">✿</span>
+          <span class="flower flower-lower" aria-hidden="true">✿</span>
+          <span class="doodle doodle-star" aria-hidden="true">✧</span>
+          <figure class="inspiration-board" role="img" aria-label="A scrapbook notebook with tabs for My Achievements, What I Want, After 5 Years, Books, Tasks, Daily Report, Websites, and Personal Diary.">
+            <div class="notebook-tabs" aria-hidden="true">
+              <span class="tab-peach">My Achievements</span>
+              <span class="tab-sage">What I Want</span>
+              <span class="tab-yellow">After 5 Years</span>
+            </div>
+            <div class="notebook-paper">
+              <div class="notebook-main">
+                <section class="board-tile board-collection">
+                  <h3>My Boards</h3>
+                  <div class="board-mini-grid">
+                    <span class="mini-board mini-photo">♡</span>
+                    <span class="mini-board mini-note">✎</span>
+                    <span class="mini-board mini-book">▤</span>
+                    <span class="mini-board mini-star">✧</span>
+                  </div>
+                  <p>Photos, moments &amp; memories</p>
+                </section>
+                <section class="board-tile board-books">
+                  <h3>My Books</h3>
+                  <ol>
+                    <li>Stories to remember</li>
+                    <li>Notes &amp; favorites</li>
+                    <li>Next on my list</li>
+                  </ol>
+                  <span class="book-stack" aria-hidden="true">▰ ▰ ▰</span>
+                </section>
+                <section class="board-tile board-diary">
+                  <div class="diary-cover" aria-hidden="true"><span>✦</span><small>my<br>diary</small></div>
+                  <div>
+                    <h3>Personal Diary</h3>
+                    <p>Thoughts, memories &amp; little moments</p>
+                    <div class="color-swatches" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+                  </div>
+                </section>
+                <section class="board-tile board-goals">
+                  <h3>My Achievements</h3>
+                  <div class="achievement-sketch" aria-hidden="true"><span>✧</span><i></i><i></i></div>
+                  <p>Save the milestones you’re proud of</p>
+                </section>
+              </div>
+              <div class="notebook-rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div class="notebook-side-tabs" aria-hidden="true">
+              <span>Books</span>
+              <span>Tasks</span>
+              <span>Daily Report</span>
+              <span>Websites</span>
+            </div>
+            <figcaption class="board-caption">Tap any board to make it your own <span aria-hidden="true">✧</span></figcaption>
+          </figure>
 
-      <label for="pass">Password</label>
-      <input id="pass" type="password" autocomplete="current-password" required>
+          <div class="collage-side">
+            <article class="vision-note">
+              <p class="note-label">Vision &amp; goals</p>
+              <div class="mountain-sketch" aria-hidden="true"><span>▲</span><i>✦</i></div>
+              <h2>After 5 Years</h2>
+              <ol>
+                <li>Dream a little bigger</li>
+                <li>Keep showing up</li>
+                <li>Celebrate the small wins</li>
+              </ol>
+            </article>
+            <article class="books-note">
+              <h2>Books &amp; Tasks</h2>
+              <div class="books-drawing" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+              <p>Reading lists, daily to-dos, and little reminders.</p>
+            </article>
+            <article class="daily-note">
+              <h2>Daily Report</h2>
+              <ul>
+                <li>✓ One step toward my goal</li>
+                <li>✓ Made time for myself</li>
+                <li>□ A new idea to try</li>
+              </ul>
+            </article>
+            <article class="tasks-note">
+              <span class="grid-label">Grid paper</span>
+              <h2>Tasks</h2>
+              <ul><li>Plan the week</li><li>6:00 AM workout</li><li>Call a friend</li></ul>
+            </article>
+            <article class="websites-note">
+              <h2>Websites</h2>
+              <div class="browser-drawing" aria-hidden="true"><i></i><i></i><i></i><span></span><span></span><span></span></div>
+              <p>Keep favorite links close at hand.</p>
+            </article>
+            <p class="scribble scribble-top">dream it<br>then do it <span>↗</span></p>
+            <p class="scribble scribble-bottom">drop in photos,<br>notes &amp; links <span>✦</span></p>
+          </div>
+          <p class="made-note">made with <span aria-hidden="true">♥</span> for your everyday stories</p>
+        </div>
+      </section>
 
-      <div id="msg" aria-live="polite"></div>
-      <button id="submit" class="btn" type="submit">Log in</button>
-    </form>
+      <aside class="card" aria-label="Sign in to My Boards">
+        <div class="card-art" aria-hidden="true">
+          <span class="sun-rays">☼</span>
+          <span class="sun-disc"></span>
+          <span class="art-leaf leaf-one"></span>
+          <span class="art-leaf leaf-two"></span>
+          <span class="art-rainbow">)))</span>
+        </div>
+        <p class="card-brand">My Boards</p>
+        <h2 id="heading">Welcome Back!</h2>
+        <p class="hint" id="hint">Sign in to access your boards.</p>
 
-    <p class="switch">
-      <span id="switchText">New here?</span>
-      <button id="switchBtn" class="link" type="button">Create an account</button>
-    </p>
-    <p class="storage-note">Your account is managed by Firebase and can be used on other devices.</p>
-  </main>
+        <form id="form">
+          <label for="user">Email</label>
+          <input id="user" type="email" autocomplete="email" placeholder="your email address..." required>
+
+          <div id="confirmWrap" hidden>
+            <label for="pass2">Confirm password</label>
+            <input id="pass2" type="password" autocomplete="new-password" placeholder="confirm your password...">
+          </div>
+
+          <div class="password-label-row">
+            <label for="pass">Password</label>
+            <button id="forgot" class="forgot-link" type="button">Forgot?</button>
+          </div>
+          <input id="pass" type="password" autocomplete="current-password" placeholder="your password..." required>
+
+          <div id="msg" aria-live="polite"></div>
+          <button id="submit" class="btn" type="submit">Sign In</button>
+        </form>
+
+        <div class="google-row" id="googleRow">
+          <span>Or continue with</span>
+          <button id="googleSignIn" class="google-button" type="button" aria-label="Continue with Google">
+            <svg class="google-mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+              <path fill="#4285F4" d="M47.5 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h13.24c-.58 2.96-2.26 5.48-4.81 7.18v6h7.77c4.54-4.18 7.3-10.33 7.3-17.65z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.92-2.15 15.9-5.8l-7.77-6c-2.15 1.45-4.89 2.3-8.13 2.3-6.25 0-11.55-4.22-13.45-9.9H2.52v6.2C6.48 42.43 14.54 48 24 48z"/>
+              <path fill="#FBBC05" d="M10.55 28.6A14.4 14.4 0 0 1 9.8 24c0-1.6.27-3.14.75-4.6v-6.2H2.52A24 24 0 0 0 0 24c0 3.88.93 7.55 2.52 10.8l8.03-6.2z"/>
+              <path fill="#EA4335" d="M24 9.5c3.53 0 6.7 1.22 9.2 3.6l6.9-6.9C35.9 2.38 30.48 0 24 0 14.54 0 6.48 5.57 2.52 13.2l8.03 6.2C12.45 13.72 17.75 9.5 24 9.5z"/>
+            </svg>
+            <span class="google-name">Google</span>
+          </button>
+        </div>
+        <p class="switch">
+          <span id="switchText">don’t have an account?</span>
+          <button id="switchBtn" class="link" type="button">Sign Up</button>
+        </p>
+      </aside>
+    </main>
+    <footer class="footer">Your memories, plans, and ideas — all in one place <span aria-hidden="true">♥</span></footer>
+  </div>
   <script type="module" src="login.js"></script>
 </body>
 </html>
