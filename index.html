@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+
+   
+
+  <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -8,7 +11,20 @@
 </head>
 <body>
   <div class="wrap">
-    <nav class="tabs" id="tabs"></nav>
+    <header class="site-header">
+      <p class="signature">created with <span aria-hidden="true">♥</span> by purvi</p>
+      <details class="account-settings" id="accountSettings">
+        <summary>⚙ Settings</summary>
+        <div class="account-settings-menu" aria-label="Account settings">
+          <button type="button" class="settings-menu-item" id="backup">⬇ Backup board</button>
+          <button type="button" class="settings-menu-item" id="restore">⬆ Restore backup</button>
+          <button type="button" class="settings-menu-item settings-danger" id="deleteAccount">Delete account</button>
+          <div class="settings-divider" aria-hidden="true"></div>
+          <button type="button" class="settings-menu-item" id="logout">Log out</button>
+        </div>
+      </details>
+    </header>
+    <main id="dashboard" class="dashboard" hidden></main>
 
     <div class="top">
       <div>
@@ -16,6 +32,8 @@
         <div class="sub"><span id="tag"></span> · <span id="count">0</span> items</div>
       </div>
       <div class="actions">
+        <button class="btn grey" id="backToDashboard">← My Boards</button>
+        <button class="btn dark" id="shuffle" hidden>🔀 Shuffle images</button>
         <button class="btn dark" id="play">▶ Slideshow</button>
         <button class="btn" id="add">+ Photos / videos</button>
         <button class="btn dark" id="addLink">+ YouTube link</button>
@@ -23,20 +41,32 @@
         <button class="btn" id="addTask">+ Add task</button>
         <button class="btn" id="addGoal">+ New tracker</button>
         <button class="btn dark" id="addWeb">+ Link website</button>
+        <button class="btn" id="newDiaryPage" hidden>+ Today's Entry</button>
+        <button class="btn dark" id="diaryCoverBtn" hidden>🎨 Cover</button>
+        <button class="btn grey" id="lockDiaryBtn" hidden>🔒 Lock</button>
       </div>
     </div>
 
     <div id="drop">Drag &amp; drop photos or videos here, or press "+ Photos / videos".</div>
     <input type="file" id="file" accept="image/*,video/*" multiple hidden>
 
-    <main id="grid"></main>
-    <div id="list"></div>
-
-    <div class="foot">
-      <button class="btn grey" id="backup">⬇ Backup</button>
-      <button class="btn grey" id="restore">⬆ Restore</button>
-      <button class="btn grey" id="logout">Log out</button>
+    <div id="boardFrame">
+      <span class="board-decoration board-bow board-bow-top" aria-hidden="true"><i></i></span>
+      <span class="board-decoration board-bow board-bow-right" aria-hidden="true"><i></i></span>
+      <span class="board-decoration board-flower board-flower-right" aria-hidden="true">✿</span>
+      <span class="board-decoration board-flower board-flower-bottom" aria-hidden="true">❀</span>
+      <span class="board-decoration board-sprig" aria-hidden="true">❧</span>
+      <span class="board-decoration board-sprig board-sprig-left" aria-hidden="true">❧</span>
+      <span class="board-decoration board-flower board-flower-bottom-right" aria-hidden="true">✿</span>
+      <span class="board-decoration board-ribbon" aria-hidden="true">little moments · big dreams</span>
+      <span class="board-decoration board-letter" aria-hidden="true">✉ a little note for you</span>
+      <span class="board-decoration board-sparkle board-sparkle-left" aria-hidden="true">✧</span>
+      <span class="board-decoration board-sparkle board-sparkle-right" aria-hidden="true">✦</span>
+      <main id="grid"></main>
     </div>
+    <div id="list"></div>
+    <div id="diaryArea" hidden></div>
+
     <input type="file" id="restoreFile" accept=".json" hidden>
   </div>
 
@@ -74,6 +104,22 @@
       <div class="row">
         <button type="button" class="btn grey" id="dlgCancel">Cancel</button>
         <button type="submit" class="btn">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="deleteAccountDialog" class="delete-account-dialog" aria-labelledby="deleteAccountTitle">
+    <form id="deleteAccountForm">
+      <h2 id="deleteAccountTitle">Delete your account and data?</h2>
+      <p class="delete-account-warning">This permanently deletes your account, boards, diary vault, and uploaded diary files. This cannot be undone.</p>
+      <label for="deleteAccountConfirmation">Type <strong>DELETE</strong> to confirm</label>
+      <input id="deleteAccountConfirmation" type="text" autocomplete="off" spellcheck="false">
+      <label id="deleteAccountPasswordLabel" for="deleteAccountPassword" hidden>Current account password</label>
+      <input id="deleteAccountPassword" type="password" autocomplete="current-password" hidden>
+      <p id="deleteAccountStatus" class="delete-account-status" role="status" aria-live="polite"></p>
+      <div class="row">
+        <button type="button" class="btn grey" id="cancelDeleteAccount">Keep my account</button>
+        <button type="submit" class="btn delete-account-confirm" id="confirmDeleteAccount" disabled>Delete account and data</button>
       </div>
     </form>
   </dialog>
